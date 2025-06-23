@@ -16,8 +16,8 @@ class AutenticacaoController{
         });
     };
     // refress token
-    static gerarRefressToken(dadosUsuario){
-        return jwt.sign(dadosUsuario, process.env.SECRET_KEY, {
+    static gerarRefressToken(dadosAluno){
+        return jwt.sign(dadosAluno, process.env.SECRET_KEY, {
             expiresIn: tempo_refresh_token
         });
     };
@@ -25,8 +25,8 @@ class AutenticacaoController{
     static async login(req, res) {
         try {
             const { matricula, senha } = req.body;
-            if(!matricula, !senha){
-                return res.status(400).json({msg: 'É necessario informar e-mail e senha para login'})
+            if(!matricula || !senha){
+                return res.status(400).json({msg: 'É necessario informar matricula e senha para login'})
             }
             const usuario = await Aluno.findOne({
                 where: {matricula}
@@ -34,18 +34,69 @@ class AutenticacaoController{
             if(!usuario){
                 return res.status(401).json({msg: 'Usuario não encontrado!'})
             };
-
+            const senhaCorreta = await bcrypt.compare(senha, usuario.senha)
+            if(!senhaCorreta){
+                return res.status(400).json({msg: 'E-mail ou senha estão incorretos'})
+            }
+            const dadosAluno = {
+                nome: usuario.nome,
+                papel: 'aluno'
+            }
+            // Gerando tokens
+            const tokenAcesso = AutenticacaoController.gerarTokenAcesso(dadosAluno)
+            const refrestoken = AutenticacaoController.gerarRefressToken(dadosAluno)
             
+            res.cookie("refreshtoken", refrestoken, {
+                httpOnly: false,
+                secure: process.env.NODE_ENV,
+                sameStrict: 'strict',
+                maxAge: 1 * 24
+            })
+
+            res.status(200).json({
+                tokenAcesso,
+                nome: usuario.nome,
+                papel: 'admin'
+            })
 
         } catch (error) {
             
         }
       }
+
+      static refreshToken(req, res){
+        const { refreshToken } = req.cookies
+        if(!refreshToken) {
+            return res.status(403).json({ msg: "Refresh token invalido!"})
+        }
+        jwt.verify(
+            refreshToken,
+            process.env.JWT_REFRESH_SECRET,
+            (erro, usuario) => {
+                if(erro) {
+                    return res.status(403).json({msg: "Refresh Token Invalido!" })
+                }
+                const dadosAluno = {
+                    nome: usuario.nome,
+                    papel: 'aluno'
+                }
+                const novoTokenAcesso = this.gerarRefressToken(dadosAluno)
+                res.status(200).json({ tokenAcesso: novoTokenAcesso })
+            }
+        )
+    }
+
       static async sair() {
         try {
-            
+            res.clearCookies('refreshToken', {
+                httpOnly: false,
+                secure: process.env.NODE_ENV,
+                sameStrict: "strict"
+            })
         } catch (error) {
-            
+            res.status(500).json({msg: 'Erro interno do servidor', erro: error.message})
         }
       }
 }
+
+module.exports = AutenticacaoController

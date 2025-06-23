@@ -26,7 +26,8 @@ const Aluno = sequelize.define(
             isEmail: { msg: "Email inválido" }
         }
       },
-      senha: DataTypes.STRING,
+      senha:{
+      type: DataTypes.STRING,
       allowNull: false,
       validade:{
         is:{
@@ -34,12 +35,14 @@ const Aluno = sequelize.define(
             msg: 'A senha deve ter no mínimo 8 caracteres, com letra maiúscula, minúscula, número e caractere especial.'
         }
       }
-    },
+    }
+  },
     {
       modelName: 'aluno',
       createdAt: 'criado_em',
       updatedAt: 'atualizado_em'
     },
+    
   );
   
   module.exports = Aluno
