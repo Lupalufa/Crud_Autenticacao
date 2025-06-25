@@ -1,13 +1,14 @@
 const express = require('express')
+const AutenticacaoController = require('../controller/autenticacao.controller')
 
 const router = express.Router()
 
-const {login, refresToken, logout } = require("../controller/autenticacao.controller")
+const {login, refreshToken, sair } = require("../controller/autenticacao.controller")
 
-router.post('/login', login)
+router.post('/login', AutenticacaoController.login)
 
-router.post('/logout', logout)
+router.post('/logout', AutenticacaoController.sair)
 
-router.post('/refress-token', refresToken)
+router.post('/refress-token', AutenticacaoController.refreshToken)
 
 module.exports = router

@@ -1,8 +1,11 @@
 const express = require("express")
-const aluno = require("../controllers/aluno.controller")
+const AlunoController = require("../controllers/aluno.controller")
 
-const router = express.Router
+const router = express.Router()
 
 
 // perfil
 
+router.post('/cadastrar', AlunoController.cadastrar)
+
+module.exports = router

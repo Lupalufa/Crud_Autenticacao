@@ -38,7 +38,7 @@ const Aluno = sequelize.define(
     }
   },
     {
-      modelName: 'aluno',
+      tableName: 'aluno',
       createdAt: 'criado_em',
       updatedAt: 'atualizado_em'
     },
