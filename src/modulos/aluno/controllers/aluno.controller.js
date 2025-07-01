@@ -19,7 +19,15 @@ class AlunoController {
   }
   static async perfil(req, res) {
     try {
-      const aluno = await Aluno.findAll();
+      const { matricula } = req.usuario // vindo do token
+
+      // Busca mais dados se necessário
+      const aluno = await Aluno.findOne({
+        where: {matricula},
+        // É quando eu vou precisar excluir algum dado especifico e o resto eu conseguiria trazer
+        // {exclude: ['senha']}
+        attributes: ["nome", "email", "matricula"]
+      });
       if (!aluno) {
         return res.status(401).json({ msg: "Não existe aluno cadastrado!" });
       }

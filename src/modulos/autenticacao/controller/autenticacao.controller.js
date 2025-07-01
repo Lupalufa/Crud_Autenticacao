@@ -40,6 +40,7 @@ class AutenticacaoController{
             }
             const dadosAluno = {
                 nome: usuario.nome,
+                matricula: usuario.matricula,
                 papel: 'aluno'
             }
             // Gerando tokens
@@ -56,7 +57,9 @@ class AutenticacaoController{
             res.status(200).json({
                 tokenAcesso,
                 nome: usuario.nome,
-                papel: 'admin'
+                matricula: usuario.matricula,
+                // posso transformar em um array com varias opções
+                papel: 'aluno'
             })
 
         } catch (error) {
@@ -86,13 +89,14 @@ class AutenticacaoController{
         )
     }
 
-      static async sair() {
+      static async sair(req, res) {
         try {
-            res.clearCookies('refreshToken', {
-                httpOnly: false,
-                secure: process.env.NODE_ENV,
-                sameStrict: "strict"
+            res.clearCookie('refreshToken', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "development",
+                sameSite: "strict"
             })
+            res.status(200).json({msg: "Logout realizado com sucesso"})
         } catch (error) {
             res.status(500).json({msg: 'Erro interno do servidor', erro: error.message})
         }
